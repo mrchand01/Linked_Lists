@@ -16,128 +16,127 @@ class Linked_List:
 
   def __len__(self):
     return self.__size
-  	 
+       
   def append_element(self, val):
-    newest = Linked_List.__Node(val)	
-    current = self.__header
-    while current.next is not self.__trailer:
-      #print(current.val)
-      current = current.next
-    current.next = newest
-    newest.next = self.__trailer
-    newest.prev = current
+    newest = Linked_List.__Node(val)
+    last_item = self.__trailer.prev
+    last_item.next = newest
     self.__trailer.prev = newest
-    self.__size += 1
-    # increase the size of the list by one, and add a
-    # node containing val at the new tail position. this 
-    # is the only way to add items at the tail position.
-    # TODO replace pass with your implementation
-    #dont let it take an empty val or list
+    newest.prev = last_item
+    newest.next = self.__trailer   
+    self.__size += 1    
+
 
   def insert_element_at(self, val, index): 
     newest = Linked_List.__Node(val)
     if index < 0 or index >= (self.__size-1): 
       raise IndexError
-    else:
-  	  current = self.__header
-  	  for i in range(0, index+1):
-  	    #print(current.val)
-  	    current = current.next
-  	  before_current = current.prev
-  	  before_current.next = newest
-  	  current.prev = newest
-  	  newest.prev = before_current
-  	  newest.next = current
-  	  self.__size += 1
-  	# assuming the head position (not the header node)
-    # is indexed 0, add a node containing val at the 
-    # specified index. If the index is not a valid 
-    # position within the list, raise an IndexError 
-    # exception. This method cannot be used to add an 
-    # item at the tail position.
-    # TODO replace pass with your implementation
-
+    elif index <= (self.__size) // 2: #Index is in the first half of the list
+      current = self.__header
+      for i in range(0, index+1):
+        current = current.next
+      before_current = current.prev
+      before_current.next = newest
+      current.prev = newest
+      newest.prev = before_current
+      newest.next = current
+      self.__size += 1
+    else: #Index is in the second half of the list
+        backwards = self.__trailer
+        for i in range(self.__size-1, index+1, -1):
+            backwards = backwards.prev
+        before_backwards = backwards.prev
+        before_backwards.next = newest
+        backwards.prev = newest
+        newest.prev = before_backwards
+        newest.next = backwards
+        self.__size += 1
+      
   def remove_element_at(self, index):
     if index < 0 or index >= (self.__size):
       raise IndexError
-    if self.__trailer.next != self.__header:
+    if (index == 0) and (self.__trailer.next == self.__header): #Josephus Problem
+      backwards2 = self.__trailer.prev
+      for i in range(0, self.__size-1):
+        backwards2 = backwards2.prev
+      backwards2 = backwards2.next
+      backwards2.prev = None
+      self.__size -= 1
+    elif index <= (self.__size) // 2: #Index is in the first half of the list
       current = self.__header
       for i in range(0, index+1):
         current = current.next
       before_current = current.prev
       after_current = current.next
-      temp = current.val
+      temp2 = current.val
       before_current.next = before_current.next.next
       after_current.prev = before_current
       self.__size -= 1
-    else:
+      return temp2
+    else: #Index is in the second half of the list
       backwards = self.__trailer.prev
-      while backwards.prev != None:
-      	backwards = backwards.prev
-      temp = backwards.val
-      backwards = backwards.next
-      backwards.prev = None
+      for i in range(self.__size-1, index+1, -1):
+        backwards = backwards.prev
+      before_backwards = backwards.prev
+      after_backwards = backwards.next
+      temp3 = backwards.val
+      before_backwards.next = before_backwards.next.next
+      after_backwards.prev = before_backwards
       self.__size -= 1
-    return temp
-    # assuming the head position (not the header node)
-    # is indexed 0, remove and return the value stored 
-    # in the node at the specified index. If the index 
-    # is invalid, raise an IndexError exception.
-    # TODO replace pass with your implementation
+      return temp3
+    
 
   def get_element_at(self, index):
-    if index < 0 or index >= self.__size:
+    if self.__trailer.next == self.__header:#Josephus Problem where Header is already at the end
+      current = self.__trailer.prev
+      return current.val
+    elif index < 0 or index >= self.__size:
       raise IndexError
-    current = self.__header
-    for i in range(0, index+1):
-      current = current.next
-    return current.val
-    # assuming the head position (not the header node)
-    # is indexed 0, return the value stored in the node 
-    # at the specified index, but do not unlink it from 
-    # the list. If the specified index is invalid, raise 
-    # an IndexError exception.
-    # TODO replace pass with your implementation
-
+    elif index <= (self.__size) // 2: #Index is in the first half of the list
+      current = self.__header
+      for i in range(0, index+1):
+        current = current.next
+      return current.val
+    else: #Index is in the second half of the list
+      backwards = self.__trailer
+      for i in range(self.__size, index+1, 0):
+        backwards = backwards.prev
+      return backwards.val
+    
   def rotate_left(self):
-  	if self.__size == 0:
-  	  pass
-  	elif self.__size == 1:
-  	  current = self.__header.next
-  	  current._prev = None
-  	  self.__header.prev = self.__trailer
-  	  self.__trailer.next = self.__header
-  	  self.__header.next = None
-  	elif self.__trailer.next != self.__header:
-  	  current = self.__header.next
-  	  current._prev = None
-  	  self.__header.prev = self.__trailer
-  	  self.__trailer.next = self.__header
-  	  self.__header.next = None
-  	  before_trailer = self.__trailer.prev
-  	  next_current = current.next
-  	  before_trailer.next = current
-  	  current.next = self.__trailer
-  	  self.__trailer.prev = current
-  	  current.prev = before_trailer
-  	  next_current.prev = None
-  	else:
-  	  backwards = self.__trailer.prev
-  	  while backwards.prev != None:
-  	  	backwards = backwards.prev
-  	  before_trailer2 = self.__trailer.prev
-  	  backwards_next = backwards.next
-  	  before_trailer2.next = backwards
-  	  backwards.next = self.__trailer
-  	  self.__trailer.prev = backwards
-  	  backwards.prev = before_trailer2
-    # rotate the list left one position. Conceptual indices
-    # should all decrease by one, except for the head, which
-    # should become the tail. For example, if the list is
-    # [ 5, 7, 9, -4 ], this method should alter it to
-    # [ 7, 9, -4, 5 ]. This method should modify the list in
-    # place and must not return a value.
-    # TODO replace pass with your implementation.
+    if self.__trailer.next == self.__header:#Josephus Problem where Header is already at the end
+      backwards = self.__trailer.prev
+      for i in range(0, self.__size-1):
+        backwards = backwards.prev
+      before_trailer2 = self.__trailer.prev
+      before_trailer2.next = backwards
+      backwards.next = self.__trailer
+      self.__trailer.prev = backwards
+      backwards.prev = before_trailer2
+      before_trailer2.next = backwards
+    elif self.__size == 0:
+      pass
+    elif self.__size == 1:
+      current = self.__header.next
+      current._prev = None
+      self.__header.prev = self.__trailer
+      self.__trailer.next = self.__header
+      self.__header.next = None
+    else: #Non-Josephus problem, Header needs to be put at the end
+      current = self.__header.next
+      front_list = self.__header.next.next
+      current.prev = None
+      self.__header.prev = self.__trailer
+      self.__trailer.next = self.__header
+      self.__header.next = None
+      before_trailer = self.__trailer.prev
+      before_trailer.next = current
+      current.next = self.__trailer
+      self.__trailer.prev = current
+      current.prev = before_trailer
+      front_list.prev = None
+      
+    
 
   def __str__(self): 
     if self.__size == 0:
@@ -146,7 +145,7 @@ class Linked_List:
       output = '[ '
       backwards = self.__trailer.prev
       output += str(backwards.val)
-    elif self.__trailer.next != self.__header:
+    elif self.__trailer.next != self.__header: #Non-Josephus problem string
       output = '[ '
       current = self.__header.next
       while current.next != self.__trailer:
@@ -154,11 +153,11 @@ class Linked_List:
         output += ', '
         current = current.next
       output += str(current.val)
-    else:
+    else: #Josephus problem string
       output = '[ '
       backwards = self.__trailer.prev
-      while backwards.prev != None:
-      	backwards = backwards.prev
+      for i in range(0, self.__size-1):
+        backwards = backwards.prev
       while backwards.next != self.__trailer:
         output += str(backwards.val)
         output += ', '
@@ -166,76 +165,15 @@ class Linked_List:
       output += str(backwards.val)
     output += ' ]'
     return output
-    #Linked List object is not iterable error
-    # return a string representation of the list's
-    # contents. An empty list should appear as [ ].
-    # A list with one element should appear as [ 5 ].
-    # A list with two elements should appear as [ 5, 7 ].
-    # You may assume that the values stored inside of the
-    # node objects implement the __str__() method, so you
-    # call str(val_object) on them to get their string
-    # representations.
-    # TODO replace pass with your implementation
+    
 
   def __iter__(self):
-    # Somebody is about to iterate through the set.
-    # initialize an index to begin.
-    self.current = self.__header
+    self.current = self.__header.next
     return self
 
   def __next__(self):
-    # if there are no more values left,
-    # terminate the iteration. Python does this automatically
-    # when it receives the exception generated here.
     if self.current.next == None:
       raise StopIteration
-    # each time a new value is requested (such as
-    # a cycle in a for loop), grab the value, up the
-    # index to prepare for the next call, and return
-    # the value.
     result = self.current.val
     self.current = self.current.next
     return result
-
-if __name__ == '__main__':
-  test_list = Linked_List()
-  # Test Case 1: Empty List
-  # try: 
-  # 	test_list.insert_element_at(4,1)
-  # 	test_list.remove_element_at(2)
-  # 	test_list.get_element_at(2)
-  # 	test_list.rotate_left()
-  # except IndexError:
-  #   print('IndexError')
-  # print(str(test_list))
-
-#  Test Case: List with one element
-  # try: 
-  #   test_list.append_element(3)
-  # 	test_list.insert_element_at(4,2)
-  # 	test_list.remove_element_at(1)
-  # 	test_list.remove_element_at(0)
-  # 	test_list.get_element_at(1)
-  # 	test_list.rotate_left()
-  # except IndexError:
-  #   print('IndexError')
-  # print(str(test_list))
-
-#  Test Case: List with one element whose value equals None
-   # try:
-   #   test_list.append_element(None)
-
-
-  
-  # Your test code should go here. Be sure to look at cases
-  # when the list is empty, when it has one element, and when 
-  # it has several elements. Do the indexed methods raise exceptions
-  # when given invalid indices? Do they position items
-  # correctly when given valid indices? Does the string
-  # representation of your list conform to the specified format?
-  # Does removing an element function correctly regardless of that
-  # element's location? Does a for loop iterate through your list
-  # from head to tail? Your writeup should explain why you chose the
-  # test cases. Leave all test cases in your code when submitting.
-  # TODO replace pass with your tests
-  
